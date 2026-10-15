@@ -1,0 +1,24 @@
+# Built by scripts/scratch-ci-repo.sh of the Fingolfin repo. It runs on every
+# push, and is red on a commit for as long as ci.txt, at the root of the repo,
+# holds the line "red": a smoke test of Fingolfin's has a session commit that,
+# and another repair it.
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ci.txt does not say red
+        run: |
+          if [ -f ci.txt ] && tr -d '\r' < ci.txt | grep -qx red; then
+            echo "::error file=ci.txt,line=1::ci.txt holds the line \"red\", and CI is red for as long as it does. To repair it, change that line of ci.txt to \"green\" and commit."
+            exit 1
+          fi
+          echo "ci.txt does not hold the line \"red\": CI is green."
